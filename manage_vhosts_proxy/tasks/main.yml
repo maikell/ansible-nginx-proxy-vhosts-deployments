@@ -1,0 +1,16 @@
+---
+
+- name: adding Nginx config files
+  template: src={{ item.value.vhost_template }} dest="/etc/nginx/conf.d/{{ item.value.vhost_name }}" 
+  with_dict: "{{ proxy_config }}"
+  when:  item.value.vhost_state == "true"
+  notify:
+   - restart nginx
+
+- name: Removing nginx config file when state is false
+  file: path="/etc/nginx/conf.d/{{ item.value.vhost_name }}" state=absent
+  with_dict: "{{ proxy_config }}"
+  when: item.value.vhost_state == "false"
+  notify:
+   - restart nginx 
+

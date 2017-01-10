@@ -1,0 +1,64 @@
+# ANSIBLE MANAGENT VHOST!!!!!!!
+# All changes will be removed with the next Ansible iteration.
+
+
+server {
+	root {{item.value.vhost_document_root}};
+	index index.php ;
+	server_name {{item.value.vhost_servername}};
+	{% if item.value.ssl is defined and item.value.ssl == true %}
+
+	rewrite ^(.*) https://$host$1 permanent;
+
+	{% endif %}
+
+	{% if item.value.vhost_letsencrypt == true %}
+
+	#Letsencrypt part
+	location  /.well-known   {
+		root /var/www/vhosts/letsencrypt/;
+		allow all;
+	}
+
+	{% endif %}
+
+	rewrite ^ {{item.value.vhost_redirect}} permanent;
+}
+
+{% if item.value.ssl is defined and item.value.ssl == true %}
+server {
+	listen {{item.value.ssl_port}};
+    root {{item.value.vhost_document_root}};
+	server_name {{item.value.vhost_servername}};
+	index index.php ;
+
+	ssl on;
+	ssl_certificate {{item.value.ssl_certificate}};
+	ssl_certificate_key {{item.value.ssl_certificate_key}};
+	ssl_dhparam {{item.value.ssl_dhkey}};
+	ssl_protocols {{ssl_protocols}};
+    ssl_session_cache shared:{{ssl_session_cache_shared}};
+    ssl_session_timeout {{ssl_session_timeout}};
+    ssl_prefer_server_ciphers {{ssl_prefer_server_ciphers}};
+    ssl_ciphers  '{{ssl_ciphers}}';
+    add_header Strict-Transport-Security "{{add_header_strict_transport_security}}";
+
+
+	error_page 404 /404.html;
+	error_page 500 502 503 504 /500x.html;
+
+	{% if item.value.vhost_letsencrypt == true %}
+
+	#Letsencrypt part
+	location  /.well-known   {
+		root /var/www/vhosts/letsencrypt/;
+		allow all;
+	}
+	{% endif %}
+
+    rewrite ^ {{item.value.vhost_redirect}} permanent;
+}
+{% endif %}
+
+# ANSIBLE MANAGENT VHOST!!!!!!!
+# All changes will be removed with the next Ansible iteration.

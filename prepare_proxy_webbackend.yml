@@ -1,0 +1,13 @@
+- hosts: server
+  become: yes
+  vars:
+   selinux: false
+   proxy_body_maxsize: "250M"
+   default_documentroot: "/var/www/vhosts/default/"
+   default_404_html: "404.html"
+   default_50x_html: "500x.html"
+   upload_max_filesize: "250M"
+   post_max_size: "250M"
+
+  roles:
+   - nginx-proxy-setup

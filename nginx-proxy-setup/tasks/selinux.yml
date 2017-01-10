@@ -1,0 +1,8 @@
+---
+## Making sure we have all the tools for debugging SElinux problems. Baseline is maybe a better place.     
+- name: Install SElinux package
+  yum: pkg=policycoreutils-python state=installed
+
+## SElinux will block all proxy traffic without enabling this boolean
+- name: Set seboolean http can connect
+  seboolean: name=httpd_can_network_connect state=yes persistent=yes

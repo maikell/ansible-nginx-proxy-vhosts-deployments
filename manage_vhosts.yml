@@ -1,0 +1,42 @@
+#
+# When creating a TLS enabled vhost, first iterate http and then fill in the ssl(TLS) definitions!
+# On the server: /opt/letsencrypt/letsencrypt-auto certonly -a webroot --webroot-path=/var/www/vhosts/letsencrypt  -d deploy.tiny-host.nl
+# 
+# Background article about load balancing and Letsencrypt: https://maikel.tiny-host.nl/it/letsencrypt.php
+---
+- hosts: server
+  become: yes
+  vars:
+   proxy_config:
+    default:
+      vhost_state: "true"
+      vhost_template: "default_vhost.conf.j2"
+      vhost_name: "kamersvolslagroom.nl.conf"
+      vhost_servername: "kamersvolslagroom.nl www.kamersvolslagroom.nl"
+      vhost_proxy_ip: "127.0.0.1"
+      vhost_proxy_port: "8080"
+      vhost_document_root: "/var/www/vhosts/default"
+      vhost_client_body_buffer: "5K"
+      vhost_max_body_size: "5M"
+      vhost_timeout: "300s"
+      vhost_letsencrypt: false   # The block for on the proxy server to generate TLS certificates, but forwards all other trafic  
+      ssl: false
+      ssl_port: "443"
+      ssl_certificate: "/etc/letsencrypt/live/127.0.0.1/fullchain.pem"
+      ssl_certificate_key: "/etc/letsencrypt/live/127.0.0.1/privkey.pem"
+      ssl_dhkey: "/etc/ssl/dh2048.pem"     #dhkey should always be generated on the server and is not managed by this playbook
+                                           #Create one on the server by $ sudo openssl dhparam -out /etc/ssl/dh2048.pem 2048
+
+    redirect.nl:
+      vhost_state: "true"
+      vhost_template: "redirect_vhost.conf.j2"
+      vhost_name: "redirect.nl.conf"
+      vhost_servername: "redirect.nl www.redirect.nl"
+      vhost_document_root: "/var/www/vhosts/backend_down"
+      vhost_letsencrypt: true
+      vhost_redirect: "https://myotherwebsite.com/"
+
+
+
+  roles:
+   - manage_vhosts_proxy
